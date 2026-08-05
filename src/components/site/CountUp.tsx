@@ -19,7 +19,9 @@ export function CountUp({
     if (!el) return;
     let raf = 0;
     const io = new IntersectionObserver(
-      ([entry]) => {
+      (entries) => {
+        const entry = entries[0];
+        if (!entry) return;
         if (!entry.isIntersecting) return;
         io.disconnect();
         const start = performance.now();
