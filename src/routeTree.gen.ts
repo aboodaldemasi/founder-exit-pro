@@ -13,7 +13,10 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as BuyRouteImport } from './routes/buy'
 import { Route as BuyerNetworkRouteImport } from './routes/buyer-network'
+import { Route as ContactRouteImport } from './routes/contact'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as SellRouteImport } from './routes/sell'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as BusinessesIndexRouteImport } from './routes/businesses.index'
 import { Route as BusinessesBusinessIdRouteImport } from './routes/businesses.$businessId'
 
@@ -37,9 +40,24 @@ const BuyerNetworkRoute = BuyerNetworkRouteImport.update({
   path: '/buyer-network',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SellRoute = SellRouteImport.update({
   id: '/sell',
   path: '/sell',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BusinessesIndexRoute = BusinessesIndexRouteImport.update({
@@ -58,7 +76,10 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/buy': typeof BuyRoute
   '/buyer-network': typeof BuyerNetworkRoute
+  '/contact': typeof ContactRoute
+  '/privacy': typeof PrivacyRoute
   '/sell': typeof SellRoute
+  '/terms': typeof TermsRoute
   '/businesses/$businessId': typeof BusinessesBusinessIdRoute
   '/businesses/': typeof BusinessesIndexRoute
 }
@@ -67,7 +88,10 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/buy': typeof BuyRoute
   '/buyer-network': typeof BuyerNetworkRoute
+  '/contact': typeof ContactRoute
+  '/privacy': typeof PrivacyRoute
   '/sell': typeof SellRoute
+  '/terms': typeof TermsRoute
   '/businesses/$businessId': typeof BusinessesBusinessIdRoute
   '/businesses': typeof BusinessesIndexRoute
 }
@@ -77,7 +101,10 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/buy': typeof BuyRoute
   '/buyer-network': typeof BuyerNetworkRoute
+  '/contact': typeof ContactRoute
+  '/privacy': typeof PrivacyRoute
   '/sell': typeof SellRoute
+  '/terms': typeof TermsRoute
   '/businesses/$businessId': typeof BusinessesBusinessIdRoute
   '/businesses/': typeof BusinessesIndexRoute
 }
@@ -88,7 +115,10 @@ export interface FileRouteTypes {
     | '/about'
     | '/buy'
     | '/buyer-network'
+    | '/contact'
+    | '/privacy'
     | '/sell'
+    | '/terms'
     | '/businesses/$businessId'
     | '/businesses/'
   fileRoutesByTo: FileRoutesByTo
@@ -97,7 +127,10 @@ export interface FileRouteTypes {
     | '/about'
     | '/buy'
     | '/buyer-network'
+    | '/contact'
+    | '/privacy'
     | '/sell'
+    | '/terms'
     | '/businesses/$businessId'
     | '/businesses'
   id:
@@ -106,7 +139,10 @@ export interface FileRouteTypes {
     | '/about'
     | '/buy'
     | '/buyer-network'
+    | '/contact'
+    | '/privacy'
     | '/sell'
+    | '/terms'
     | '/businesses/$businessId'
     | '/businesses/'
   fileRoutesById: FileRoutesById
@@ -116,7 +152,10 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   BuyRoute: typeof BuyRoute
   BuyerNetworkRoute: typeof BuyerNetworkRoute
+  ContactRoute: typeof ContactRoute
+  PrivacyRoute: typeof PrivacyRoute
   SellRoute: typeof SellRoute
+  TermsRoute: typeof TermsRoute
   BusinessesBusinessIdRoute: typeof BusinessesBusinessIdRoute
   BusinessesIndexRoute: typeof BusinessesIndexRoute
 }
@@ -151,11 +190,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BuyerNetworkRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sell': {
       id: '/sell'
       path: '/sell'
       fullPath: '/sell'
       preLoaderRoute: typeof SellRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/businesses/': {
@@ -180,7 +240,10 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   BuyRoute: BuyRoute,
   BuyerNetworkRoute: BuyerNetworkRoute,
+  ContactRoute: ContactRoute,
+  PrivacyRoute: PrivacyRoute,
   SellRoute: SellRoute,
+  TermsRoute: TermsRoute,
   BusinessesBusinessIdRoute: BusinessesBusinessIdRoute,
   BusinessesIndexRoute: BusinessesIndexRoute,
 }
