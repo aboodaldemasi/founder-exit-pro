@@ -10,12 +10,24 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as BuyRouteImport } from './routes/buy'
+import { Route as SellRouteImport } from './routes/sell'
 import { Route as BusinessesIndexRouteImport } from './routes/businesses.index'
 import { Route as BusinessesBusinessIdRouteImport } from './routes/businesses.$businessId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BuyRoute = BuyRouteImport.update({
+  id: '/buy',
+  path: '/buy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SellRoute = SellRouteImport.update({
+  id: '/sell',
+  path: '/sell',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BusinessesIndexRoute = BusinessesIndexRouteImport.update({
@@ -31,30 +43,44 @@ const BusinessesBusinessIdRoute = BusinessesBusinessIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/buy': typeof BuyRoute
+  '/sell': typeof SellRoute
   '/businesses/$businessId': typeof BusinessesBusinessIdRoute
   '/businesses/': typeof BusinessesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/buy': typeof BuyRoute
+  '/sell': typeof SellRoute
   '/businesses/$businessId': typeof BusinessesBusinessIdRoute
   '/businesses': typeof BusinessesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/buy': typeof BuyRoute
+  '/sell': typeof SellRoute
   '/businesses/$businessId': typeof BusinessesBusinessIdRoute
   '/businesses/': typeof BusinessesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/businesses/$businessId' | '/businesses/'
+  fullPaths: '/' | '/buy' | '/sell' | '/businesses/$businessId' | '/businesses/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/businesses/$businessId' | '/businesses'
-  id: '__root__' | '/' | '/businesses/$businessId' | '/businesses/'
+  to: '/' | '/buy' | '/sell' | '/businesses/$businessId' | '/businesses'
+  id:
+    | '__root__'
+    | '/'
+    | '/buy'
+    | '/sell'
+    | '/businesses/$businessId'
+    | '/businesses/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  BuyRoute: typeof BuyRoute
+  SellRoute: typeof SellRoute
   BusinessesBusinessIdRoute: typeof BusinessesBusinessIdRoute
   BusinessesIndexRoute: typeof BusinessesIndexRoute
 }
@@ -66,6 +92,20 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/buy': {
+      id: '/buy'
+      path: '/buy'
+      fullPath: '/buy'
+      preLoaderRoute: typeof BuyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sell': {
+      id: '/sell'
+      path: '/sell'
+      fullPath: '/sell'
+      preLoaderRoute: typeof SellRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/businesses/': {
@@ -87,6 +127,8 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  BuyRoute: BuyRoute,
+  SellRoute: SellRoute,
   BusinessesBusinessIdRoute: BusinessesBusinessIdRoute,
   BusinessesIndexRoute: BusinessesIndexRoute,
 }
