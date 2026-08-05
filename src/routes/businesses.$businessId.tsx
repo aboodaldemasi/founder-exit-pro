@@ -5,10 +5,10 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Reveal } from "@/components/site/Reveal";
 import { Eyebrow, GlassCard, Section } from "@/components/site/Section";
-import { getBusiness } from "@/data/businesses";
+import { getBusiness, type Business } from "@/data/businesses";
 
 export const Route = createFileRoute("/businesses/$businessId")({
-  loader: ({ params }) => {
+  loader: ({ params }): { business: Business } => {
     const business = getBusiness(params.businessId);
     if (!business) throw notFound();
     return { business };
@@ -34,7 +34,7 @@ export const Route = createFileRoute("/businesses/$businessId")({
 });
 
 function BusinessDetail() {
-  const { business: b } = Route.useLoaderData();
+  const { business: b } = Route.useLoaderData() as { business: Business };
 
   const topMetrics = [
     ["MRR", b.mrr],
