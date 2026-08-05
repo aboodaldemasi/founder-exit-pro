@@ -10,7 +10,9 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as BuyRouteImport } from './routes/buy'
+import { Route as BuyerNetworkRouteImport } from './routes/buyer-network'
 import { Route as SellRouteImport } from './routes/sell'
 import { Route as BusinessesIndexRouteImport } from './routes/businesses.index'
 import { Route as BusinessesBusinessIdRouteImport } from './routes/businesses.$businessId'
@@ -20,9 +22,19 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BuyRoute = BuyRouteImport.update({
   id: '/buy',
   path: '/buy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BuyerNetworkRoute = BuyerNetworkRouteImport.update({
+  id: '/buyer-network',
+  path: '/buyer-network',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SellRoute = SellRouteImport.update({
@@ -43,14 +55,18 @@ const BusinessesBusinessIdRoute = BusinessesBusinessIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/buy': typeof BuyRoute
+  '/buyer-network': typeof BuyerNetworkRoute
   '/sell': typeof SellRoute
   '/businesses/$businessId': typeof BusinessesBusinessIdRoute
   '/businesses/': typeof BusinessesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/buy': typeof BuyRoute
+  '/buyer-network': typeof BuyerNetworkRoute
   '/sell': typeof SellRoute
   '/businesses/$businessId': typeof BusinessesBusinessIdRoute
   '/businesses': typeof BusinessesIndexRoute
@@ -58,20 +74,38 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/buy': typeof BuyRoute
+  '/buyer-network': typeof BuyerNetworkRoute
   '/sell': typeof SellRoute
   '/businesses/$businessId': typeof BusinessesBusinessIdRoute
   '/businesses/': typeof BusinessesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/buy' | '/sell' | '/businesses/$businessId' | '/businesses/'
+  fullPaths:
+    | '/'
+    | '/about'
+    | '/buy'
+    | '/buyer-network'
+    | '/sell'
+    | '/businesses/$businessId'
+    | '/businesses/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/buy' | '/sell' | '/businesses/$businessId' | '/businesses'
+  to:
+    | '/'
+    | '/about'
+    | '/buy'
+    | '/buyer-network'
+    | '/sell'
+    | '/businesses/$businessId'
+    | '/businesses'
   id:
     | '__root__'
     | '/'
+    | '/about'
     | '/buy'
+    | '/buyer-network'
     | '/sell'
     | '/businesses/$businessId'
     | '/businesses/'
@@ -79,7 +113,9 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AboutRoute: typeof AboutRoute
   BuyRoute: typeof BuyRoute
+  BuyerNetworkRoute: typeof BuyerNetworkRoute
   SellRoute: typeof SellRoute
   BusinessesBusinessIdRoute: typeof BusinessesBusinessIdRoute
   BusinessesIndexRoute: typeof BusinessesIndexRoute
@@ -94,11 +130,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/buy': {
       id: '/buy'
       path: '/buy'
       fullPath: '/buy'
       preLoaderRoute: typeof BuyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/buyer-network': {
+      id: '/buyer-network'
+      path: '/buyer-network'
+      fullPath: '/buyer-network'
+      preLoaderRoute: typeof BuyerNetworkRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sell': {
@@ -127,7 +177,9 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AboutRoute: AboutRoute,
   BuyRoute: BuyRoute,
+  BuyerNetworkRoute: BuyerNetworkRoute,
   SellRoute: SellRoute,
   BusinessesBusinessIdRoute: BusinessesBusinessIdRoute,
   BusinessesIndexRoute: BusinessesIndexRoute,
