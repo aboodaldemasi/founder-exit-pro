@@ -5,19 +5,19 @@ import { Eyebrow, Section } from "@/components/site/Section";
 export const Route = createFileRoute("/terms")({
   head: () => ({
     meta: [
-      { title: "Terms of Use — Merideon Advisory" },
-      { name: "description", content: "Terms governing use of the Merideon Advisory website and advisory services." },
-      { property: "og:title", content: "Terms of Use — Merideon Advisory" },
-      { property: "og:description", content: "Terms governing use of the Merideon Advisory website and advisory services." },
+      { title: "Terms of Use — Founder Exit" },
+      { name: "description", content: "Terms governing use of the Founder Exit marketplace." },
+      { property: "og:title", content: "Terms of Use — Founder Exit" },
+      { property: "og:description", content: "Terms governing use of the Founder Exit marketplace." },
     ],
   }),
   component: Page,
 });
 
 const sections: { h: string; p: string }[] = [
-  { h: "Scope of services", p: "Merideon Advisory provides sell-side and buy-side M&A advisory services. Nothing on this site constitutes an offer to sell or a solicitation to buy any security or business." },
-  { h: "No investment advice", p: "Information published about represented businesses is provided for evaluation purposes. It is not financial, legal or tax advice, and prospective buyers must complete their own due diligence." },
-  { h: "Listing information", p: "Metrics shown for represented businesses are provided by sellers and reviewed by Merideon. While reviewed in good faith, they are not warranted, and full verification occurs during diligence." },
+  { h: "Scope of services", p: "Founder Exit is a marketplace that connects SaaS founders with buyers. Nothing on this site constitutes an offer to sell or a solicitation to buy any security or business." },
+  { h: "No investment advice", p: "Information published about listed businesses is provided for evaluation purposes. It is not financial, legal or tax advice, and prospective buyers must complete their own due diligence." },
+  { h: "Listing information", p: "Metrics shown for listed businesses are provided by sellers and reviewed by Founder Exit. While reviewed in good faith, they are not warranted, and full verification occurs during diligence." },
   { h: "Confidentiality and NDAs", p: "Access to complete financial and operational information is conditional on a signed non-disclosure agreement. Breach of an NDA may result in removal from the buyer network and legal action." },
   { h: "Fees", p: "Seller representation is engaged on a success-fee basis unless otherwise agreed in a written mandate letter. Buyer network membership is free of charge." },
   { h: "Governing terms", p: "These terms may be updated from time to time. Continued use of the site constitutes acceptance of the current version." },

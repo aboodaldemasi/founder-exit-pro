@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
 import { CalendarClock, Clock, Linkedin, Mail, Send } from "lucide-react";
 import { toast } from "sonner";
@@ -21,30 +21,23 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/contact")({
   head: () => ({
     meta: [
-      { title: "Contact — Book a Confidential Consultation | Merideon" },
+      { title: "Contact — Founder Exit" },
       {
         name: "description",
         content:
-          "Speak with a senior M&A advisor. Book a confidential consultation, email the desk, or connect on LinkedIn.",
+          "Talk to Founder Exit about selling or buying a SaaS. Book a call or send a message.",
       },
-      { property: "og:title", content: "Contact Merideon Advisory" },
+      { property: "og:title", content: "Contact Founder Exit" },
       {
         property: "og:description",
-        content: "Book a confidential consultation with a senior M&A advisor.",
+        content: "A short conversation with the marketplace team.",
       },
     ],
   }),
   component: ContactPage,
 });
 
-const slots = [
-  "Tue 09:00",
-  "Tue 13:30",
-  "Wed 11:00",
-  "Wed 16:00",
-  "Thu 10:30",
-  "Fri 14:00",
-];
+const slots = ["Tue 09:00", "Tue 13:30", "Wed 11:00", "Wed 16:00", "Thu 10:30", "Fri 14:00"];
 
 function ContactPage() {
   const [slot, setSlot] = useState<string | null>(null);
@@ -55,35 +48,35 @@ function ContactPage() {
     setSubmitting(true);
     setTimeout(() => {
       setSubmitting(false);
-      toast.success("Consultation requested", {
+      toast.success("Message received", {
         description: slot
-          ? `We will confirm your ${slot} slot by email shortly.`
-          : "An advisor will reply within one business day.",
+          ? `We will confirm your ${slot} slot by email.`
+          : "We will reply within one business day.",
       });
       (e.target as HTMLFormElement).reset();
       setSlot(null);
-    }, 700);
+    }, 600);
   };
 
   return (
     <Section className="pt-16">
       <Reveal>
         <div className="max-w-3xl">
-          <Eyebrow>Confidential</Eyebrow>
+          <Eyebrow>Contact</Eyebrow>
           <h1 className="text-gradient mt-6 text-4xl font-semibold tracking-tight text-balance md:text-5xl">
-            Speak With a Senior Advisor
+            Talk to the team
           </h1>
           <p className="mt-5 text-base leading-relaxed text-muted-foreground md:text-lg">
-            Whether you are twelve months from selling or reviewing an offer on your desk,
-            a thirty-minute conversation costs nothing and is entirely confidential.
+            Selling, buying, or just checking a listing — send a note. Sensitive details stay
+            off the public marketplace.
           </p>
         </div>
       </Reveal>
 
-      <div className="mt-14 grid gap-6 lg:grid-cols-[1.5fr_1fr]">
+      <div className="mt-12 grid gap-6 lg:grid-cols-[1.5fr_1fr]">
         <Reveal>
           <GlassCard className="p-8 md:p-10">
-            <h2 className="text-xl font-semibold tracking-tight">Book a Consultation</h2>
+            <h2 className="text-xl font-semibold tracking-tight">Send a message</h2>
             <form onSubmit={onSubmit} className="mt-8 grid gap-6 sm:grid-cols-2">
               <div className="grid gap-2">
                 <Label htmlFor="cname">Full name</Label>
@@ -146,7 +139,7 @@ function ContactPage() {
 
               <div className="sm:col-span-2">
                 <Button type="submit" size="lg" variant="premium" disabled={submitting}>
-                  {submitting ? "Sending…" : "Book Consultation"} <Send />
+                  {submitting ? "Sending…" : "Send"} <Send />
                 </Button>
               </div>
             </form>
@@ -157,22 +150,21 @@ function ContactPage() {
           <Reveal delay={60}>
             <GlassCard className="p-8">
               <CalendarClock className="size-5 text-primary" />
-              <h2 className="mt-6 text-base font-semibold">Calendar</h2>
+              <h2 className="mt-5 text-base font-semibold">Calls</h2>
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                Slots are 30 minutes, held on a private line, and confirmed by email with a
-                calendar invitation.
+                Thirty minutes, private line, confirmed by email.
               </p>
             </GlassCard>
           </Reveal>
 
-          <Reveal delay={120}>
+          <Reveal delay={100}>
             <GlassCard className="p-8">
               <h2 className="text-base font-semibold">Direct</h2>
               <a
-                href="mailto:advisory@merideon.com"
+                href="mailto:hello@founderexit.pro"
                 className="mt-5 flex items-center gap-3 text-sm text-muted-foreground transition-colors hover:text-foreground"
               >
-                <Mail className="size-4 text-primary" /> advisory@merideon.com
+                <Mail className="size-4 text-primary" /> hello@founderexit.pro
               </a>
               <a
                 href="https://www.linkedin.com"
@@ -180,17 +172,20 @@ function ContactPage() {
                 rel="noreferrer noopener"
                 className="mt-4 flex items-center gap-3 text-sm text-muted-foreground transition-colors hover:text-foreground"
               >
-                <Linkedin className="size-4 text-primary" /> Merideon Advisory
+                <Linkedin className="size-4 text-primary" /> Founder Exit
               </a>
+              <Button asChild variant="ghost" className="mt-6 w-full">
+                <Link to="/businesses">Browse listings</Link>
+              </Button>
             </GlassCard>
           </Reveal>
 
-          <Reveal delay={180}>
+          <Reveal delay={140}>
             <GlassCard className="p-8">
-              <h2 className="text-base font-semibold">Confidentiality</h2>
+              <h2 className="text-base font-semibold">Privacy</h2>
               <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-                Every enquiry is treated as privileged. We will sign your NDA before any
-                material information is exchanged.
+                Enquiries are not published. Customer data and full financials stay gated until
+                both sides agree.
               </p>
             </GlassCard>
           </Reveal>

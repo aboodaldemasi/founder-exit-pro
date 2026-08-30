@@ -13,6 +13,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
+import { AuthDialog } from "@/components/site/AuthDialog";
 import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
@@ -80,17 +81,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Merideon Advisory — M&A for SaaS & Digital Businesses" },
+      { title: "Founder Exit — SaaS Acquisition Marketplace" },
       {
         name: "description",
         content:
-          "Sell-side M&A advisory representing founders of SaaS, AI, software and digital businesses in confidential transactions.",
+          "Buy and sell SaaS companies. Browse verified listings, request information, and close acquisitions on Founder Exit.",
       },
-      { name: "author", content: "Merideon Advisory" },
-      { property: "og:title", content: "Merideon Advisory" },
+      { name: "author", content: "Founder Exit" },
+      { property: "og:title", content: "Founder Exit" },
       {
         property: "og:description",
-        content: "Confidential M&A representation for SaaS and digital business founders.",
+        content: "A marketplace for SaaS founders and buyers to transact with confidence.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -106,7 +107,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap",
       },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "icon", href: "/logo-mark.png", type: "image/png" },
     ],
   }),
   shellComponent: RootShell,
@@ -141,6 +142,7 @@ function RootComponent() {
           <Outlet />
         </main>
         <Footer />
+        <AuthDialog />
         <Toaster />
       </div>
     </QueryClientProvider>

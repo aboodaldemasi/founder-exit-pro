@@ -1,35 +1,27 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useState, type FormEvent } from "react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState } from "react";
 import { ArrowRight, Lock, ShieldCheck, Timer } from "lucide-react";
-import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Reveal } from "@/components/site/Reveal";
-import { Eyebrow, GlassCard, Section, SectionHeader } from "@/components/site/Section";
+import { Eyebrow, Section } from "@/components/site/Section";
+import { SellForm } from "@/components/site/SellForm";
+import { SellerWorkspace } from "@/components/site/SellerWorkspace";
+import { openAuth, useMarketplace } from "@/lib/marketplace";
 
 export const Route = createFileRoute("/sell")({
   head: () => ({
     meta: [
-      { title: "Sell Your Business — Free Valuation | Merideon Advisory" },
+      { title: "Sell Your SaaS — Founder Exit" },
       {
         name: "description",
         content:
-          "Request a confidential, no-obligation valuation for your SaaS, AI or digital business. Sell-side representation with fees paid only on close.",
+          "List your SaaS in six steps. Manage listings, inquiries, offers, and deal status from your seller workspace.",
       },
-      { property: "og:title", content: "Sell Your Business — Merideon Advisory" },
+      { property: "og:title", content: "Sell Your SaaS — Founder Exit" },
       {
         property: "og:description",
-        content: "Confidential valuation and sell-side representation for founders.",
+        content: "A simple listing flow for founders ready to exit.",
       },
     ],
   }),
@@ -37,131 +29,79 @@ export const Route = createFileRoute("/sell")({
 });
 
 const assurances = [
-  { icon: Lock, title: "Confidential by default", copy: "Nothing is shared, listed or disclosed without your written approval." },
-  { icon: ShieldCheck, title: "Success-based fees", copy: "No retainer, no listing fee. We are paid when your deal closes." },
-  { icon: Timer, title: "Valuation in 48 hours", copy: "A senior advisor reviews your submission and responds with a range." },
+  { icon: Lock, title: "Private until you publish", copy: "Drafts and under-review listings stay off the marketplace." },
+  { icon: ShieldCheck, title: "You control access", copy: "Buyers request information. You decide what to share." },
+  { icon: Timer, title: "Six steps to list", copy: "Basic, financials, metrics, tech, sale details, then review." },
 ];
 
 function SellPage() {
-  const [submitting, setSubmitting] = useState(false);
-
-  const onSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setSubmitting(true);
-    setTimeout(() => {
-      setSubmitting(false);
-      toast.success("Valuation request received", {
-        description: "A senior advisor will reply confidentially within 48 hours.",
-      });
-      (e.target as HTMLFormElement).reset();
-    }, 700);
-  };
+  const { user, ready } = useMarketplace();
+  const [view, setView] = useState<"form" | "workspace">("form");
+  const isSeller = user?.type === "seller";
 
   return (
     <>
-      <Section className="pt-16 pb-10">
+      <Section className="pt-16 pb-8">
         <Reveal>
           <div className="max-w-3xl">
-            <Eyebrow>Sell-side representation</Eyebrow>
-            <h1 className="text-gradient mt-6 text-4xl font-semibold tracking-tight text-balance md:text-5xl">
-              Sell Your Business the Way Institutions Do
-            </h1>
-            <p className="mt-5 text-base leading-relaxed text-muted-foreground md:text-lg">
-              We run a structured, confidential process that creates competition among
-              qualified buyers — so price is set by the market, not by the first offer
-              that reaches your inbox.
+            <Eyebrow>For founders</Eyebrow>
+            <h1 className="mt-4 text-4xl font-semibold tracking-tight">Sell your company</h1>
+            <p className="mt-3 max-w-xl text-muted-foreground">
+              Fill in the numbers. We review the listing, then buyers can find it.
             </p>
+            {ready && !user ? (
+              <Button className="mt-7" variant="premium" onClick={() => openAuth("register", "seller")}>
+                Create a seller account
+              </Button>
+            ) : null}
+            {user && !isSeller ? (
+              <p className="mt-5 text-sm text-muted-foreground">
+                You are signed in as a buyer. Create a seller account to list a company.
+              </p>
+            ) : null}
           </div>
         </Reveal>
 
-        <div className="mt-14 grid gap-6 md:grid-cols-3">
+        <div className="mt-12 grid gap-4 md:grid-cols-3">
           {assurances.map((a, i) => (
-            <Reveal key={a.title} delay={i * 90}>
-              <GlassCard className="h-full p-7">
+            <Reveal key={a.title} delay={i * 60}>
+              <div className="h-full rounded-2xl border border-border/70 bg-card/30 p-6">
                 <a.icon className="size-5 text-primary" />
-                <h2 className="mt-8 text-base font-semibold">{a.title}</h2>
+                <h2 className="mt-5 text-base font-semibold">{a.title}</h2>
                 <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{a.copy}</p>
-              </GlassCard>
+              </div>
             </Reveal>
           ))}
         </div>
       </Section>
 
-      <Section className="pt-6">
-        <SectionHeader
-          eyebrow="Free valuation"
-          title="Request Your Valuation"
-          description="Six fields. One senior advisor. A defensible range within two business days."
-        />
-        <Reveal delay={80}>
-          <GlassCard className="mx-auto mt-12 max-w-3xl p-8 md:p-10">
-            <form onSubmit={onSubmit} className="grid gap-6 sm:grid-cols-2">
-              <div className="grid gap-2">
-                <Label htmlFor="name">Full name</Label>
-                <Input id="name" name="name" required placeholder="Jane Fletcher" />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="email">Work email</Label>
-                <Input id="email" name="email" type="email" required placeholder="jane@company.com" />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="business">Business name</Label>
-                <Input id="business" name="business" required placeholder="Company Inc." />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="category">Category</Label>
-                <Select name="category" defaultValue="AI SaaS">
-                  <SelectTrigger id="category">
-                    <SelectValue placeholder="Select" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {[
-                      "AI SaaS",
-                      "Micro SaaS",
-                      "Software Company",
-                      "Shopify App",
-                      "Chrome Extension",
-                      "WordPress Plugin",
-                      "E-commerce Brand",
-                      "Website",
-                      "Newsletter",
-                      "Mobile App",
-                    ].map((c) => (
-                      <SelectItem key={c} value={c}>
-                        {c}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="mrr">Monthly recurring revenue</Label>
-                <Input id="mrr" name="mrr" required placeholder="$45,000" />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="profit">Annual net profit</Label>
-                <Input id="profit" name="profit" required placeholder="$320,000" />
-              </div>
-              <div className="grid gap-2 sm:col-span-2">
-                <Label htmlFor="notes">Anything we should know</Label>
-                <Textarea
-                  id="notes"
-                  name="notes"
-                  rows={4}
-                  placeholder="Growth trend, churn, customer concentration, timeline expectations…"
-                />
-              </div>
-              <div className="flex flex-col gap-4 sm:col-span-2 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-xs text-muted-foreground">
-                  Submissions are treated as confidential and never listed publicly.
-                </p>
-                <Button type="submit" size="lg" variant="premium" disabled={submitting}>
-                  {submitting ? "Sending…" : "Get Free Valuation"} <ArrowRight />
-                </Button>
-              </div>
-            </form>
-          </GlassCard>
-        </Reveal>
+      <Section className="pt-4">
+        {isSeller ? (
+          <div className="mb-8 flex flex-wrap gap-2">
+            <Button variant={view === "form" ? "premium" : "ghost"} onClick={() => setView("form")}>
+              Add listing
+            </Button>
+            <Button variant={view === "workspace" ? "premium" : "ghost"} onClick={() => setView("workspace")}>
+              Seller workspace
+            </Button>
+          </div>
+        ) : null}
+
+        {isSeller && view === "workspace" ? (
+          <SellerWorkspace />
+        ) : (
+          <>
+            <h2 className="mb-6 text-2xl font-semibold tracking-tight">List your company</h2>
+            <SellForm onSubmitted={() => setView("workspace")} />
+            <p className="mt-6 text-center text-sm text-muted-foreground">
+              Prefer to talk first?{" "}
+              <Link to="/contact" className="text-primary hover:underline">
+                Contact us
+              </Link>
+              .
+            </p>
+          </>
+        )}
       </Section>
     </>
   );
