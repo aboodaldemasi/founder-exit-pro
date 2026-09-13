@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Section } from "@/components/site/Section";
 import { OpportunityCard } from "@/components/site/OpportunityCard";
-import { businesses, categories } from "@/data/businesses";
-import { getVisibleListings, useMarketplace } from "@/lib/marketplace";
+import { categories } from "@/data/businesses";
+import { publicListings, useMarketplace } from "@/lib/marketplace";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/businesses/")({
@@ -82,11 +82,8 @@ const growthBands: Band[] = [
 ];
 
 function BusinessesPage() {
-  const { listings, ready } = useMarketplace();
-  const catalog = useMemo(
-    () => (ready ? getVisibleListings() : businesses),
-    [listings, ready],
-  );
+  const { listings } = useMarketplace();
+  const catalog = useMemo(() => publicListings(listings), [listings]);
 
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("All");
@@ -107,7 +104,7 @@ function BusinessesPage() {
     let list = catalog.filter((b) => {
       const matchesQuery =
         !q ||
-        [b.name, b.headline, b.summary, b.category, b.model, ...b.stack]
+        [b.code, b.category, b.model]
           .join(" ")
           .toLowerCase()
           .includes(q);
@@ -157,7 +154,9 @@ function BusinessesPage() {
   return (
     <Section className="pt-16 pb-16">
       <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">SaaS for sale</h1>
-      <p className="mt-2 text-muted-foreground">Price, revenue, and profit on every listing.</p>
+      <p className="mt-2 text-muted-foreground">
+        Anonymous listings. Price and metrics only — no product names.
+      </p>
 
       <div className="mt-8 space-y-4">
         <div className="relative">
@@ -168,7 +167,7 @@ function BusinessesPage() {
               setQuery(e.target.value);
               setPage(1);
             }}
-            placeholder="Search companies…"
+            placeholder="Filter by code or category…"
             className="pl-9"
           />
         </div>
@@ -233,9 +232,16 @@ function BusinessesPage() {
       </div>
 
       {filtered.length === 0 ? (
-        <p className="mt-12 text-center text-sm text-muted-foreground">
-          No SaaS matches these filters. Reset to see all listings.
-        </p>
+        <div className="mt-12 rounded-2xl border border-dashed border-border px-6 py-14 text-center">
+          <p className="font-medium">
+            {catalog.length === 0 ? "No SaaS listed yet" : "No SaaS matches these filters"}
+          </p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {catalog.length === 0
+              ? "Listings appear after we verify a seller and approve their SaaS."
+              : "Reset filters to see all listings."}
+          </p>
+        </div>
       ) : null}
 
       {pages > 1 ? (

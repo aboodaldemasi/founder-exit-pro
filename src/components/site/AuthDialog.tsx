@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { AUTH_EVENT, loginUser, registerUser, type AccountType } from "@/lib/marketplace";
 import { cn } from "@/lib/utils";
 
@@ -18,7 +19,7 @@ type Mode = "login" | "register";
 export function AuthDialog() {
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<Mode>("login");
-  const [type, setType] = useState<AccountType>("buyer");
+  const [type, setType] = useState<AccountType>("visitor");
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -33,7 +34,7 @@ export function AuthDialog() {
     return () => window.removeEventListener(AUTH_EVENT, onOpen);
   }, []);
 
-  const onSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const form = new FormData(e.currentTarget);
     const email = String(form.get("email") ?? "");
@@ -42,8 +43,16 @@ export function AuthDialog() {
 
     const result =
       mode === "login"
-        ? loginUser(email, password)
-        : registerUser({ name, email, password, type });
+        ? await loginUser(email, password)
+        : await registerUser({
+            name,
+            email,
+            password,
+            type,
+            companyName: String(form.get("companyName") ?? ""),
+            companyWebsite: String(form.get("companyWebsite") ?? ""),
+            companyNote: String(form.get("companyNote") ?? ""),
+          });
 
     if (!result.ok) {
       setError(result.error);
@@ -51,11 +60,13 @@ export function AuthDialog() {
     }
 
     setOpen(false);
-    toast.success(mode === "login" ? "Welcome back" : "Account created", {
-      description:
-        result.user.type === "seller"
-          ? "You can list your SaaS and manage offers from Sell."
-          : "Browse listings, save favorites, and send offers.",
+    const pending = result.user.type === "seller" && result.user.sellerStatus !== "approved";
+    toast.success(mode === "login" ? "Welcome back" : pending ? "Application sent" : "Account created", {
+      description: pending
+        ? "We will review that you operate a real SaaS, then email you."
+        : result.user.type === "seller"
+          ? "You can list a SaaS from Sell."
+          : "Browse anonymous SaaS listings. To buy, contact us and pay a deposit.",
     });
   };
 
@@ -66,8 +77,8 @@ export function AuthDialog() {
           <DialogTitle>{mode === "login" ? "Sign in" : "Create an account"}</DialogTitle>
           <DialogDescription>
             {mode === "login"
-              ? "Access your saved SaaS, requests, and offers."
-              : "Join as a buyer or seller. Same marketplace, different workspace."}
+              ? "Visitor or seller — same sign-in."
+              : "Register as a visitor to browse, or as a seller to apply. We only list SaaS."}
           </DialogDescription>
         </DialogHeader>
 
@@ -95,34 +106,60 @@ export function AuthDialog() {
             <>
               <div className="grid gap-2">
                 <Label htmlFor="auth-name">Full name</Label>
-                <Input id="auth-name" name="name" required placeholder="Alex Chen" />
+                <Input id="auth-name" name="name" required placeholder="Your name" />
               </div>
               <div className="grid gap-2">
-                <Label>Account type</Label>
+                <Label>I am a</Label>
                 <div className="grid grid-cols-2 gap-2">
-                  {(["buyer", "seller"] as const).map((t) => (
+                  {(
+                    [
+                      ["visitor", "Visitor"],
+                      ["seller", "Seller"],
+                    ] as const
+                  ).map(([t, label]) => (
                     <button
                       key={t}
                       type="button"
                       onClick={() => setType(t)}
                       className={cn(
-                        "rounded-lg border px-3 py-2 text-sm capitalize transition-colors",
+                        "rounded-lg border px-3 py-2 text-sm transition-colors",
                         type === t
                           ? "border-primary/40 bg-primary/10 text-foreground"
                           : "border-border text-muted-foreground hover:text-foreground",
                       )}
                     >
-                      {t}
+                      {label}
                     </button>
                   ))}
                 </div>
               </div>
+              {type === "seller" ? (
+                <>
+                  <div className="grid gap-2">
+                    <Label htmlFor="companyName">SaaS / company name (private)</Label>
+                    <Input id="companyName" name="companyName" required placeholder="Never shown to visitors" />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="companyWebsite">Website</Label>
+                    <Input id="companyWebsite" name="companyWebsite" placeholder="https://" />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="companyNote">How we can verify you</Label>
+                    <Textarea
+                      id="companyNote"
+                      name="companyNote"
+                      rows={3}
+                      placeholder="Short note: you own this SaaS, revenue range, etc."
+                    />
+                  </div>
+                </>
+              ) : null}
             </>
           ) : null}
 
           <div className="grid gap-2">
             <Label htmlFor="auth-email">Email</Label>
-            <Input id="auth-email" name="email" type="email" required placeholder="you@company.com" />
+            <Input id="auth-email" name="email" type="email" required placeholder="you@email.com" />
           </div>
           <div className="grid gap-2">
             <Label htmlFor="auth-password">Password</Label>
@@ -132,7 +169,7 @@ export function AuthDialog() {
           {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
           <Button type="submit" variant="premium">
-            {mode === "login" ? "Sign in" : "Create account"}
+            {mode === "login" ? "Sign in" : type === "seller" ? "Apply as seller" : "Create visitor account"}
           </Button>
         </form>
       </DialogContent>

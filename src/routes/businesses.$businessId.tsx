@@ -1,40 +1,50 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, BadgeCheck, Lock } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-
 import { Reveal } from "@/components/site/Reveal";
-import { Eyebrow, GlassCard, Section } from "@/components/site/Section";
+import { GlassCard, Section } from "@/components/site/Section";
 import { CompanyMark } from "@/components/site/Logo";
-import { DealActions, FavoriteButton } from "@/components/site/DealDialogs";
-import { getCatalogBusiness } from "@/data/businesses";
-import { getBusiness, useMarketplace } from "@/lib/marketplace";
+import { BRAND } from "@/lib/brand";
+import { anonymizeBusiness, publicListingCode } from "@/lib/listing-privacy";
+import { useMarketplace } from "@/lib/marketplace";
+import { getPlatformFn } from "@/lib/platform-fns";
 import type { Business } from "@/data/businesses";
 
 export const Route = createFileRoute("/businesses/$businessId")({
-  loader: ({ params }): { business: Business | null; businessId: string } => {
-    const business = getCatalogBusiness(params.businessId) ?? getBusiness(params.businessId) ?? null;
-    return { business, businessId: params.businessId };
+  loader: async ({ params }): Promise<{ business: Business | null; businessId: string }> => {
+    const data = await getPlatformFn();
+    const listing = data.listings.find((l) => l.id === params.businessId);
+    const allowed =
+      listing &&
+      (listing.status === "Active" ||
+        listing.status === "Under Offer" ||
+        data.admin ||
+        data.user?.email === listing.ownerEmail);
+    if (!allowed || !listing) {
+      return { business: null, businessId: params.businessId };
+    }
+    const { status: _s, ownerEmail: _o, ...business } = listing;
+    return {
+      business: data.admin ? business : anonymizeBusiness(business),
+      businessId: params.businessId,
+    };
   },
   head: ({ loaderData }) => {
-    if (!loaderData) {
-      return {
-        meta: [{ title: "Listing unavailable — Founder Exit" }, { name: "robots", content: "noindex" }],
-      };
-    }
-    const b = loaderData.business;
+    const b = loaderData?.business;
     if (!b) {
       return {
         meta: [{ title: "Listing — Founder Exit" }, { name: "robots", content: "noindex" }],
       };
     }
-    const title = `${b.name} — ${b.category} for sale | Founder Exit`;
+    const code = publicListingCode(b);
+    const title = `${code} — ${b.category} SaaS | Founder Exit`;
     return {
       meta: [
         { title },
-        { name: "description", content: b.headline },
+        { name: "description", content: `Anonymous ${b.category} SaaS. Asking ${b.price}.` },
         { property: "og:title", content: title },
-        { property: "og:description", content: b.headline },
+        { property: "og:description", content: "Anonymous SaaS listing. Product name is private." },
       ],
     };
   },
@@ -46,9 +56,20 @@ function BusinessDetail() {
     business: Business | null;
     businessId: string;
   };
-  const { listings, user } = useMarketplace();
-  const b =
-    loaded ?? listings.find((l) => l.id === businessId) ?? getBusiness(businessId);
+  const { listings, user, admin } = useMarketplace();
+  const listing = listings.find((l) => l.id === businessId);
+  const allowed =
+    Boolean(listing) &&
+    (listing?.status === "Active" ||
+      listing?.status === "Under Offer" ||
+      admin ||
+      listing?.ownerEmail === user?.email);
+  const raw: Business | undefined =
+    loaded ??
+    (listing && allowed
+      ? (({ status: _s, ownerEmail: _o, ...business }) => business)(listing)
+      : undefined);
+  const b = raw ? (admin ? raw : anonymizeBusiness(raw)) : undefined;
 
   if (!b) {
     return (
@@ -56,23 +77,28 @@ function BusinessDetail() {
         <h1 className="text-2xl font-semibold">Listing not found</h1>
         <p className="mt-2 text-sm text-muted-foreground">This SaaS is no longer available.</p>
         <Button asChild variant="premium" className="mt-6">
-          <Link to="/businesses">Back to marketplace</Link>
+          <Link to="/businesses">Back</Link>
         </Button>
       </Section>
     );
   }
 
-  const unlocked = Boolean(user);
+  const code = publicListingCode(b);
+  const depositHref = `mailto:${BRAND.paymentEmail}?subject=${encodeURIComponent(`Deposit for ${code}`)}&body=${encodeURIComponent(
+    `Hi Founder Exit,\n\nI want to buy listing ${code} (${b.category}).\nPlease send deposit instructions.\n\nThank you.`,
+  )}`;
 
   const metrics: [string, string][] = [
     ["Asking price", b.price],
     ["MRR", b.mrr],
     ["ARR", b.arr],
     ["Monthly profit", b.profit],
-    ["Revenue (TTM)", b.revenue],
     ["Growth", b.growthRate],
     ["Customers", b.customers],
     ["Churn", b.churn],
+    ["Gross margin", b.grossMargin],
+    ["Age", b.age],
+    ["Model", b.model],
   ];
 
   return (
@@ -82,161 +108,57 @@ function BusinessDetail() {
           to="/businesses"
           className="inline-flex items-center gap-2 text-xs text-muted-foreground transition-colors hover:text-foreground"
         >
-          <ArrowLeft className="size-3.5" /> Marketplace
+          <ArrowLeft className="size-3.5" /> SaaS for sale
         </Link>
 
         <div className="mt-8 flex flex-col justify-between gap-8 lg:flex-row lg:items-end">
           <div className="flex items-start gap-4">
-            <CompanyMark name={b.name} hue={b.hue} className="size-14 text-base" />
+            <CompanyMark name="SaaS" hue={b.hue} className="size-14 text-base" />
             <div>
-              <Eyebrow>{b.category}</Eyebrow>
-              <h1 className="mt-3 flex items-center gap-2 text-4xl font-semibold tracking-tight md:text-5xl">
-                <span className="text-gradient">{b.name}</span>
-                {b.verified ? <BadgeCheck className="size-6 text-primary" aria-label="Verified" /> : null}
-              </h1>
-              <p className="mt-3 max-w-2xl text-base leading-relaxed text-muted-foreground">
-                {b.headline}
-              </p>
-              <p className="mt-2 text-xs text-muted-foreground">
-                {b.geography} · Founded {b.founded} · {b.age} · {b.model}
+              <p className="text-xs text-muted-foreground">{b.category}</p>
+              <h1 className="mt-1 text-3xl font-semibold tracking-tight">{code}</h1>
+              <p className="mt-2 max-w-xl text-sm text-muted-foreground">
+                Anonymous SaaS listing. The product name, customers, and stack stay private so the
+                live business is not disrupted.
               </p>
             </div>
           </div>
-          <div className="flex items-end gap-3">
-            <FavoriteButton businessId={b.id} />
-            <div className="rounded-2xl border border-border bg-card/40 px-5 py-4">
-              <p className="text-[10px] tracking-[0.16em] text-muted-foreground uppercase">Asking price</p>
-              <p className="mt-1 text-2xl font-semibold">
-                <span className="text-emerald-gradient">{b.price}</span>
-              </p>
-            </div>
+          <div className="rounded-2xl border border-border bg-card/40 px-5 py-4">
+            <p className="text-[10px] tracking-[0.16em] text-muted-foreground uppercase">Asking price</p>
+            <p className="mt-1 text-3xl font-semibold tabular-nums text-primary">{b.price || "—"}</p>
           </div>
         </div>
       </Reveal>
 
       <Reveal delay={60}>
-        <div className="mt-10 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-border/70 md:grid-cols-4">
+        <div className="mt-10 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-border/70 md:grid-cols-5">
           {metrics.map(([k, v]) => (
             <div key={k} className="bg-white/[0.02] px-5 py-5">
               <p className="text-[10px] tracking-[0.12em] text-muted-foreground uppercase">{k}</p>
-              <p className="mt-1.5 text-base font-semibold tabular-nums">{v}</p>
+              <p className="mt-1.5 text-base font-semibold tabular-nums">{v || "—"}</p>
             </div>
           ))}
         </div>
       </Reveal>
 
-      <div className="mt-10 grid gap-6 lg:grid-cols-[1.65fr_1fr]">
-        <div className="flex flex-col gap-6">
-          <GlassCard className="p-7">
-            <h2 className="text-lg font-semibold tracking-tight">Overview</h2>
-            <p className="mt-4 text-sm leading-relaxed text-muted-foreground">{b.summary}</p>
-          </GlassCard>
-
-          <GlassCard className="p-7">
-            <h2 className="text-lg font-semibold tracking-tight">Financial metrics</h2>
-            <div className="mt-5 divide-y divide-border text-sm">
-              {[
-                ["Asking price", b.price],
-                ["Monthly revenue (MRR)", b.mrr],
-                ["Annual revenue (ARR)", b.arr],
-                ["Monthly profit", b.profit],
-                ["SDE (TTM)", b.sde],
-                ["Gross margin", b.grossMargin],
-                ["Multiple", b.multiple],
-                ["ARPU", b.arpu],
-              ].map(([k, v]) => (
-                <div key={k} className="flex items-center justify-between py-3">
-                  <span className="text-muted-foreground">{k}</span>
-                  <span className="font-medium">{v}</span>
-                </div>
-              ))}
-            </div>
-          </GlassCard>
-
-          <GlassCard className="p-7">
-            <h2 className="text-lg font-semibold tracking-tight">Growth & customers</h2>
-            <ul className="mt-5 space-y-3">
-              {b.highlights.map((g) => (
-                <li key={g} className="flex gap-3 text-sm leading-relaxed text-muted-foreground">
-                  <span className="mt-2 size-1.5 shrink-0 rounded-full bg-primary" />
-                  {g}
-                </li>
-              ))}
-            </ul>
-            {b.growthProfile.length ? (
-              <>
-                <h3 className="mt-8 text-sm font-semibold">Growth opportunities</h3>
-                <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
-                  {b.growthProfile.map((g) => (
-                    <li key={g}>{g}</li>
-                  ))}
-                </ul>
-              </>
-            ) : null}
-          </GlassCard>
-
-          <GlassCard className="p-7">
-            <h2 className="text-lg font-semibold tracking-tight">Traffic / analytics</h2>
-            <p className="mt-3 text-sm text-muted-foreground">{b.traffic}</p>
-            <h3 className="mt-8 text-sm font-semibold">Assets included</h3>
-            <ul className="mt-3 grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
-              {b.assets.map((a) => (
-                <li key={a}>{a}</li>
-              ))}
-            </ul>
-          </GlassCard>
-        </div>
-
-        <div className="flex flex-col gap-6">
-          <GlassCard className="p-7">
-            <h2 className="text-sm font-semibold tracking-tight">Tech stack</h2>
-            <div className="mt-4 flex flex-wrap gap-1.5">
-              {b.stack.map((t) => (
-                <span
-                  key={t}
-                  className="rounded-md border border-primary/20 bg-primary/8 px-2.5 py-1 text-[11px] text-primary"
-                >
-                  {t}
-                </span>
-              ))}
-            </div>
-            <h2 className="mt-7 text-sm font-semibold tracking-tight">Business model</h2>
-            <p className="mt-2 text-sm text-muted-foreground">{b.model}</p>
-            <h2 className="mt-7 text-sm font-semibold tracking-tight">Reason for selling</h2>
-            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{b.reasonForSale}</p>
-          </GlassCard>
-
-          <GlassCard className="p-7">
-            <h2 className="flex items-center gap-2 text-sm font-semibold tracking-tight">
-              <Lock className="size-4 text-primary" /> Sensitive data
-            </h2>
-            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-              Customer lists, full financials, and code access stay private until the seller
-              approves your request.
-            </p>
-            <ul className="mt-4 space-y-2">
-              {b.confidential.map((item) => (
-                <li key={item} className="flex items-center justify-between text-sm">
-                  <span className={unlocked ? "text-muted-foreground" : "blur-[5px] select-none"}>
-                    {unlocked ? item : "Confidential material"}
-                  </span>
-                  <span className="text-[11px] text-muted-foreground">
-                    {unlocked ? "Request to unlock" : "Sign in required"}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </GlassCard>
-
-          <GlassCard className="p-7">
-            <h2 className="text-sm font-semibold tracking-tight">Next step</h2>
-            <p className="mt-2 mb-5 text-sm text-muted-foreground">
-              Request information, contact the seller, or make an offer.
-            </p>
-            <DealActions business={b} />
-          </GlassCard>
-        </div>
-      </div>
+      <Reveal delay={80}>
+        <GlassCard className="mt-8 p-7">
+          <h2 className="text-lg font-semibold tracking-tight">Want to buy this SaaS?</h2>
+          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+            Founder Exit is the broker. You do not contact the seller directly. Email us, then pay
+            a deposit so we know you are serious. Payment details go to{" "}
+            {BRAND.paymentEmail} (a dedicated inbox can be added later).
+          </p>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <Button asChild variant="premium">
+              <a href={depositHref}>Email deposit for {code}</a>
+            </Button>
+            <Button asChild variant="outline">
+              <Link to="/buy">How buying works</Link>
+            </Button>
+          </div>
+        </GlassCard>
+      </Reveal>
     </Section>
   );
 }

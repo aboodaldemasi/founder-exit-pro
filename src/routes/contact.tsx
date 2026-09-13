@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
-import { CalendarClock, Clock, Linkedin, Mail, Send } from "lucide-react";
+import { CalendarClock, Clock, Mail, Send } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,8 @@ import {
 } from "@/components/ui/select";
 import { Reveal } from "@/components/site/Reveal";
 import { Eyebrow, GlassCard, Section } from "@/components/site/Section";
+import { BRAND } from "@/lib/brand";
+import { submitContact } from "@/lib/marketplace";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/contact")({
@@ -30,7 +32,7 @@ export const Route = createFileRoute("/contact")({
       { property: "og:title", content: "Contact Founder Exit" },
       {
         property: "og:description",
-        content: "A short conversation with the marketplace team.",
+        content: "A short conversation with the operator of this intermediary marketplace.",
       },
     ],
   }),
@@ -43,19 +45,33 @@ function ContactPage() {
   const [slot, setSlot] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const onSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const form = e.currentTarget;
+    const data = new FormData(form);
     setSubmitting(true);
-    setTimeout(() => {
-      setSubmitting(false);
+    try {
+      const company = String(data.get("company") ?? "").trim();
+      const body = String(data.get("message") ?? "").trim();
+      await submitContact({
+        name: String(data.get("cname") ?? ""),
+        email: String(data.get("cemail") ?? ""),
+        topic: String(data.get("topic") ?? "General"),
+        message: company ? `${body}\n\nCompany: ${company}` : body,
+        ...(slot ? { slot } : {}),
+      });
       toast.success("Message received", {
         description: slot
-          ? `We will confirm your ${slot} slot by email.`
-          : "We will reply within one business day.",
+          ? `Requested slot: ${slot}. We will confirm by email.`
+          : "We will reply by email.",
       });
-      (e.target as HTMLFormElement).reset();
+      form.reset();
       setSlot(null);
-    }, 600);
+    } catch {
+      toast.error("Could not send. Try email instead.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -64,11 +80,10 @@ function ContactPage() {
         <div className="max-w-3xl">
           <Eyebrow>Contact</Eyebrow>
           <h1 className="text-gradient mt-6 text-4xl font-semibold tracking-tight text-balance md:text-5xl">
-            Talk to the team
+            Talk to us
           </h1>
           <p className="mt-5 text-base leading-relaxed text-muted-foreground md:text-lg">
-            Selling, buying, or just checking a listing — send a note. Sensitive details stay
-            off the public marketplace.
+            Selling or buying a SaaS — send a note. Product names stay off the public site.
           </p>
         </div>
       </Reveal>
@@ -134,7 +149,7 @@ function ContactPage() {
 
               <div className="grid gap-2 sm:col-span-2">
                 <Label htmlFor="message">Message</Label>
-                <Textarea id="message" name="message" rows={4} placeholder="A few lines of context…" />
+                <Textarea id="message" name="message" rows={4} required minLength={8} placeholder="A few lines of context…" />
               </div>
 
               <div className="sm:col-span-2">
@@ -152,7 +167,7 @@ function ContactPage() {
               <CalendarClock className="size-5 text-primary" />
               <h2 className="mt-5 text-base font-semibold">Calls</h2>
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                Thirty minutes, private line, confirmed by email.
+                Pick a preferred time above. It is a request, not a confirmed booking, until we reply.
               </p>
             </GlassCard>
           </Reveal>
@@ -161,18 +176,10 @@ function ContactPage() {
             <GlassCard className="p-8">
               <h2 className="text-base font-semibold">Direct</h2>
               <a
-                href="mailto:hello@founderexit.pro"
+                href={`mailto:${BRAND.email}`}
                 className="mt-5 flex items-center gap-3 text-sm text-muted-foreground transition-colors hover:text-foreground"
               >
-                <Mail className="size-4 text-primary" /> hello@founderexit.pro
-              </a>
-              <a
-                href="https://www.linkedin.com"
-                target="_blank"
-                rel="noreferrer noopener"
-                className="mt-4 flex items-center gap-3 text-sm text-muted-foreground transition-colors hover:text-foreground"
-              >
-                <Linkedin className="size-4 text-primary" /> Founder Exit
+                <Mail className="size-4 text-primary" /> {BRAND.email}
               </a>
               <Button asChild variant="ghost" className="mt-6 w-full">
                 <Link to="/businesses">Browse listings</Link>

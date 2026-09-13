@@ -3,8 +3,8 @@ import { ArrowRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { OpportunityCard } from "@/components/site/OpportunityCard";
-import { businesses } from "@/data/businesses";
 import { BRAND } from "@/lib/brand";
+import { publicListings, useMarketplace } from "@/lib/marketplace";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -12,10 +12,10 @@ export const Route = createFileRoute("/")({
       { title: `${BRAND.name} — ${BRAND.tagline}` },
       {
         name: "description",
-        content: "A marketplace to buy and sell SaaS companies. Browse listings, request details, and make an offer.",
+        content: "Anonymous SaaS for sale. We broker between seller and buyer. Product names stay private.",
       },
       { property: "og:title", content: `${BRAND.name} — ${BRAND.tagline}` },
-      { property: "og:description", content: "Buy and sell SaaS companies." },
+      { property: "og:description", content: "Browse SaaS numbers. Buy through Founder Exit with a deposit." },
       { property: "og:type", content: "website" },
     ],
   }),
@@ -23,64 +23,56 @@ export const Route = createFileRoute("/")({
 });
 
 function HomePage() {
-  const featured = businesses.slice(0, 3);
+  const { listings } = useMarketplace();
+  const featured = publicListings(listings).slice(0, 3);
 
   return (
     <>
       <section className="px-5 pt-20 pb-12 md:pt-28">
         <div className="mx-auto w-full max-w-6xl">
-          <h1 className="max-w-3xl text-4xl font-semibold tracking-tight text-balance md:text-6xl">
+          <p className="text-sm font-medium text-primary">SaaS broker</p>
+          <h1 className="mt-4 max-w-3xl text-4xl font-semibold tracking-tight text-balance md:text-6xl">
             {BRAND.tagline}
           </h1>
           <p className="mt-5 max-w-xl text-base text-muted-foreground md:text-lg">
-            {BRAND.name} is a marketplace for software businesses. See the price, revenue,
-            and profit. Talk to the seller when you are serious.
+            Visitors see price and metrics only — never the product name. Sellers apply, we
+            verify, then list. Buyers email us and pay a deposit.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Button asChild size="lg" variant="premium">
               <Link to="/businesses">
-                Browse listings <ArrowRight />
+                Browse SaaS <ArrowRight />
               </Link>
             </Button>
             <Button asChild size="lg" variant="outline">
-              <Link to="/sell">Sell your company</Link>
+              <Link to="/sell">Sell a SaaS</Link>
             </Button>
           </div>
-          <p className="mt-8 text-sm text-muted-foreground">
-            6 live listings · $100K–$2M · Metrics reviewed before they go live
-          </p>
         </div>
       </section>
 
       <section className="px-5 py-10">
         <div className="mx-auto w-full max-w-6xl">
           <div className="mb-6 flex items-end justify-between">
-            <h2 className="text-xl font-semibold tracking-tight">For sale now</h2>
+            <h2 className="text-xl font-semibold tracking-tight">Live listings</h2>
             <Link to="/businesses" className="text-sm text-primary hover:underline">
               See all
             </Link>
           </div>
-          <div className="grid gap-4 lg:grid-cols-3">
-            {featured.map((b) => (
-              <OpportunityCard key={b.id} b={b} />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="px-5 py-14">
-        <div className="mx-auto grid w-full max-w-6xl gap-8 md:grid-cols-3">
-          {[
-            { n: "1", t: "Browse", c: "Open a listing. Price, MRR, profit, and stack are public." },
-            { n: "2", t: "Ask", c: "Request information or message the seller. Sensitive files stay private." },
-            { n: "3", t: "Offer", c: "Send a number. Track the deal from your account." },
-          ].map((s) => (
-            <div key={s.n}>
-              <p className="text-sm font-medium text-primary">{s.n}</p>
-              <h3 className="mt-2 text-base font-semibold">{s.t}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{s.c}</p>
+          {featured.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-border px-6 py-14 text-center">
+              <p className="font-medium">No SaaS listed yet</p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                A listing appears here after we approve a seller and their SaaS.
+              </p>
             </div>
-          ))}
+          ) : (
+            <div className="grid gap-4 lg:grid-cols-3">
+              {featured.map((b) => (
+                <OpportunityCard key={b.id} b={b} />
+              ))}
+            </div>
+          )}
         </div>
       </section>
     </>

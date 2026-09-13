@@ -4,6 +4,7 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useRouterState,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
@@ -85,13 +86,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         name: "description",
         content:
-          "Buy and sell SaaS companies. Browse verified listings, request information, and close acquisitions on Founder Exit.",
+          "Buy and sell SaaS companies through an intermediary marketplace. Founder Exit connects sellers and buyers — it does not own the listings.",
       },
       { name: "author", content: "Founder Exit" },
       { property: "og:title", content: "Founder Exit" },
       {
         property: "og:description",
-        content: "A marketplace for SaaS founders and buyers to transact with confidence.",
+        content: "An intermediary marketplace connecting SaaS sellers and buyers.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -132,17 +133,17 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const isAdmin = useRouterState({ select: (s) => s.location.pathname.startsWith("/admin") });
 
   return (
     <QueryClientProvider client={queryClient}>
       <div className="relative min-h-screen bg-background">
-        <Navbar />
-        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-        <main className="pt-16">
+        {isAdmin ? null : <Navbar />}
+        <main className={isAdmin ? "" : "pt-16"}>
           <Outlet />
         </main>
-        <Footer />
-        <AuthDialog />
+        {isAdmin ? null : <Footer />}
+        {isAdmin ? null : <AuthDialog />}
         <Toaster />
       </div>
     </QueryClientProvider>

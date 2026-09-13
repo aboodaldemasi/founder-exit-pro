@@ -43,14 +43,14 @@ export function FavoriteButton({
       className={className}
       onClick={() => {
         if (!user) {
-          openAuth("login", "buyer");
+          openAuth("login", "visitor");
           return;
         }
-        if (user.type !== "buyer") {
-          toast.error("Favorites are available on buyer accounts.");
+        if (user.type !== "visitor") {
+          toast.error("Saved listings are for visitor accounts.");
           return;
         }
-        toggleFavorite(user.email, businessId);
+        void toggleFavorite(businessId);
         toast.success(saved ? "Removed from saved SaaS" : "Saved to your list");
       }}
     >
@@ -67,57 +67,53 @@ export function DealActions({
   business: Business;
   layout?: "stack" | "row";
 }) {
-  const { user } = useMarketplace();
+  const { user, listings } = useMarketplace();
   const [kind, setKind] = useState<DealKind>(null);
 
-  const requireBuyer = (next: DealKind) => {
+  const requireBuyer = (_next: DealKind) => {
     if (!user) {
-      openAuth("register", "buyer");
+      openAuth("register", "visitor");
       return;
     }
-    if (user.type !== "buyer") {
-      toast.error("Switch to a buyer account to contact sellers and send offers.");
-      return;
-    }
-    setKind(next);
+    toast.error("To buy, email Founder Exit and pay a deposit.");
   };
 
-  const onSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!user || !kind) return;
     const form = new FormData(e.currentTarget);
     const message = String(form.get("message") ?? "");
     const amount = String(form.get("amount") ?? "");
-    const sellerEmail = sellerEmailFor(business.id);
+    const sellerEmail = sellerEmailFor(listings, business.id);
 
-    if (kind === "offer") {
-      addOffer({
-        businessId: business.id,
-        businessName: business.name,
-        buyerEmail: user.email,
-        buyerName: user.name,
-        sellerEmail,
-        amount,
-        note: message,
-      });
-      toast.success("Offer sent", {
-        description: `Your offer on ${business.name} is with the seller.`,
-      });
-    } else {
-      addInquiry({
-        businessId: business.id,
-        businessName: business.name,
-        buyerEmail: user.email,
-        buyerName: user.name,
-        sellerEmail,
-        type: kind,
-        message,
-      });
-      toast.success(kind === "information" ? "Information requested" : "Message sent", {
-        description: "You can follow the conversation from your buyer workspace.",
-      });
+    try {
+      if (kind === "offer") {
+        await addOffer({
+          businessId: business.id,
+          businessName: business.name,
+          sellerEmail,
+          amount,
+          note: message,
+        });
+        toast.success("Offer sent", {
+          description: `Your offer on ${business.name} is with the seller.`,
+        });
+      } else {
+        await addInquiry({
+          businessId: business.id,
+          businessName: business.name,
+          sellerEmail,
+          type: kind,
+          message,
+        });
+        toast.success(kind === "information" ? "Information requested" : "Message sent", {
+          description: "You can follow the conversation from your buyer workspace.",
+        });
+      }
+      setKind(null);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not send.");
     }
-    setKind(null);
   };
 
   return (

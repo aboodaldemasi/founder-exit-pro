@@ -4,15 +4,15 @@ import { Button } from "@/components/ui/button";
 import { OpportunityCard } from "@/components/site/OpportunityCard";
 import { EmptyState } from "@/components/site/DealDialogs";
 import { ConversationList, TabBar } from "@/components/site/SellerWorkspace";
-import { formatTime, getVisibleListings, replyToConversation, useMarketplace } from "@/lib/marketplace";
+import { formatTime, publicListings, replyToConversation, useMarketplace } from "@/lib/marketplace";
 
 export function BuyerWorkspace() {
-  const { user, favorites, inquiries, offers, conversations } = useMarketplace();
+  const { user, favorites, inquiries, offers, conversations, listings } = useMarketplace();
   const [tab, setTab] = useState<"saved" | "requests" | "offers" | "conversations">("saved");
 
   if (!user) return null;
 
-  const saved = getVisibleListings().filter((b) => favorites.includes(b.id));
+  const saved = publicListings(listings).filter((b) => favorites.includes(b.id));
   const mineInq = inquiries.filter((i) => i.buyerEmail === user.email);
   const mineOff = offers.filter((o) => o.buyerEmail === user.email);
   const mineCon = conversations.filter((c) => c.buyerEmail === user.email);
@@ -95,7 +95,7 @@ export function BuyerWorkspace() {
           <ConversationList
             items={mineCon}
             role="buyer"
-            onReply={(id, text) => replyToConversation(id, "buyer", text)}
+            onReply={(id, text) => void replyToConversation(id, "buyer", text)}
           />
         )
       ) : null}

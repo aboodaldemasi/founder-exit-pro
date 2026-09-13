@@ -1,34 +1,30 @@
 import { Link } from "@tanstack/react-router";
-import { BadgeCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CompanyMark } from "@/components/site/Logo";
-import { FavoriteButton } from "@/components/site/DealDialogs";
+import { publicListingCode } from "@/lib/listing-privacy";
 import type { Business } from "@/data/businesses";
 
 export function OpportunityCard({ b }: { b: Business }) {
+  const code = publicListingCode(b);
+
   return (
     <article className="flex h-full flex-col rounded-2xl border border-border bg-card/40 p-5">
-      <div className="flex items-start gap-3">
-        <CompanyMark name={b.name} hue={b.hue} className="size-10 text-xs" />
-        <div className="min-w-0 flex-1">
-          <div className="flex items-start justify-between gap-2">
-            <div>
-              <p className="text-xs text-muted-foreground">{b.category}</p>
-              <h3 className="mt-0.5 flex items-center gap-1.5 font-semibold tracking-tight">
-                {b.name}
-                {b.verified ? <BadgeCheck className="size-4 text-primary" aria-label="Verified" /> : null}
-              </h3>
-            </div>
-            <FavoriteButton businessId={b.id} />
-          </div>
+      <p className="text-[11px] tracking-[0.14em] text-muted-foreground uppercase">Asking price</p>
+      <p className="mt-1 text-3xl font-semibold tracking-tight text-primary tabular-nums">
+        {b.price || "—"}
+      </p>
+
+      <div className="mt-5 flex items-start gap-3">
+        <CompanyMark name="SaaS" hue={b.hue} className="size-10 text-xs" />
+        <div className="min-w-0">
+          <p className="text-xs text-muted-foreground">{b.category}</p>
+          <h3 className="mt-0.5 font-semibold tracking-tight">{code}</h3>
+          <p className="mt-0.5 text-xs text-muted-foreground">Anonymous SaaS listing</p>
         </div>
       </div>
 
-      <p className="mt-3 line-clamp-2 text-sm text-muted-foreground">{b.headline}</p>
-
-      <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
+      <dl className="mt-4 grid grid-cols-3 gap-3 text-sm">
         {[
-          ["Price", b.price],
           ["MRR", b.mrr],
           ["Profit", b.profit],
           ["Growth", b.growthRate],
@@ -43,7 +39,7 @@ export function OpportunityCard({ b }: { b: Business }) {
       <div className="mt-auto pt-5">
         <Button asChild variant="premium" size="sm" className="w-full">
           <Link to="/businesses/$businessId" params={{ businessId: b.id }}>
-            View listing
+            View numbers
           </Link>
         </Button>
       </div>

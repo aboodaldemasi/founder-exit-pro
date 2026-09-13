@@ -7,13 +7,9 @@ import {
   formatTime,
   replyToConversation,
   setOfferStatus,
-  updateListingStatus,
   useMarketplace,
-  type ListingStatus,
 } from "@/lib/marketplace";
 import { cn } from "@/lib/utils";
-
-const statuses: ListingStatus[] = ["Draft", "Under Review", "Active", "Under Offer", "Sold"];
 
 export function SellerWorkspace() {
   const { user, listings, inquiries, offers, conversations } = useMarketplace();
@@ -53,23 +49,15 @@ export function SellerWorkspace() {
             {mine.map((l) => (
               <div key={l.id} className="flex flex-col gap-4 rounded-2xl border border-border p-5 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <p className="font-medium">{l.name}</p>
+                  <p className="font-medium">{l.code || l.name}</p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    {l.price} · {l.category} · {l.status}
+                    Private name: {l.name} · {l.price} · {l.category} · {l.status}
                   </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <select
-                    value={l.status}
-                    onChange={(e) => updateListingStatus(l.id, e.target.value as ListingStatus)}
-                    className="h-9 rounded-lg border border-border bg-background px-3 text-sm"
-                  >
-                    {statuses.map((s) => (
-                      <option key={s} value={s}>
-                        {s}
-                      </option>
-                    ))}
-                  </select>
+                  <span className="rounded-full border border-border px-3 py-1 text-xs">
+                    {l.status}
+                  </span>
                   {l.status === "Active" || l.status === "Under Offer" ? (
                     <Button asChild size="sm" variant="ghost">
                       <Link to="/businesses/$businessId" params={{ businessId: l.id }}>
@@ -122,10 +110,10 @@ export function SellerWorkspace() {
                   </div>
                   {o.status === "Pending" ? (
                     <div className="flex gap-2">
-                      <Button size="sm" variant="premium" onClick={() => setOfferStatus(o.id, "Accepted")}>
+                      <Button size="sm" variant="premium" onClick={() => void setOfferStatus(o.id, "Accepted")}>
                         Accept
                       </Button>
-                      <Button size="sm" variant="outline" onClick={() => setOfferStatus(o.id, "Declined")}>
+                      <Button size="sm" variant="outline" onClick={() => void setOfferStatus(o.id, "Declined")}>
                         Decline
                       </Button>
                     </div>
@@ -145,7 +133,7 @@ export function SellerWorkspace() {
           <ConversationList
             items={myConversations}
             role="seller"
-            onReply={(id, text) => replyToConversation(id, "seller", text)}
+            onReply={(id, text) => void replyToConversation(id, "seller", text)}
           />
         )
       ) : null}

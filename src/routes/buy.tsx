@@ -1,11 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, Bookmark, MessageSquare, Search, Send } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Reveal } from "@/components/site/Reveal";
-import { Eyebrow, Section, SectionHeader } from "@/components/site/Section";
-import { BuyerWorkspace } from "@/components/site/BuyerWorkspace";
-import { openAuth, useMarketplace } from "@/lib/marketplace";
+import { Eyebrow, Section } from "@/components/site/Section";
+import { BRAND } from "@/lib/brand";
 
 export const Route = createFileRoute("/buy")({
   head: () => ({
@@ -14,94 +13,68 @@ export const Route = createFileRoute("/buy")({
       {
         name: "description",
         content:
-          "Browse SaaS companies, save favorites, request information, and send offers on Founder Exit.",
+          "Browse anonymous SaaS listings, then contact Founder Exit and pay a deposit to buy.",
       },
       { property: "og:title", content: "Buy a SaaS — Founder Exit" },
       {
         property: "og:description",
-        content: "A buyer workspace for SaaS acquisitions.",
+        content: "We broker the sale. A deposit confirms you are a serious buyer.",
       },
     ],
   }),
   component: BuyPage,
 });
 
-const stages = [
-  { icon: Search, title: "Browse", copy: "Search and filter by price, MRR, ARR, profit, age, and growth." },
-  { icon: Bookmark, title: "Save", copy: "Keep a shortlist of SaaS companies in your workspace." },
-  { icon: MessageSquare, title: "Request", copy: "Ask for information or contact the seller — data stays gated." },
-  { icon: Send, title: "Offer", copy: "Send a number and follow the conversation through to close." },
+const steps = [
+  { n: "1", t: "Browse numbers", c: "See price, MRR, profit, and category. No product name." },
+  { n: "2", t: "Email us", c: "Tell us which listing code you want. We are the only contact." },
+  { n: "3", t: "Pay a deposit", c: "A deposit shows you intend to buy. Payment details by email." },
 ];
 
 function BuyPage() {
-  const { user, ready } = useMarketplace();
-  const isBuyer = user?.type === "buyer";
+  const mail = `mailto:${BRAND.paymentEmail}?subject=${encodeURIComponent("I want to buy a SaaS")}&body=${encodeURIComponent(
+    "Hi Founder Exit,\n\nI want to buy a listed SaaS. Listing code:\n\nPlease send deposit instructions.\n",
+  )}`;
 
   return (
     <>
       <Section className="pt-16 pb-8">
         <Reveal>
-          <div className="max-w-3xl">
+          <div className="max-w-2xl">
             <Eyebrow>For buyers</Eyebrow>
             <h1 className="mt-4 text-4xl font-semibold tracking-tight">Buy a SaaS</h1>
-            <p className="mt-3 max-w-xl text-muted-foreground">
-              Browse listings, save a shortlist, then request details or send an offer.
+            <p className="mt-3 text-muted-foreground">
+              Visitors can browse listings. To buy, you deal with Founder Exit — not the seller.
+              We sit in the middle. A deposit is required so we know you are serious.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Button asChild size="lg" variant="premium">
                 <Link to="/businesses">
-                  Browse marketplace <ArrowRight />
+                  See SaaS for sale <ArrowRight />
                 </Link>
               </Button>
-              {ready && !user ? (
-                <Button size="lg" variant="ghost" onClick={() => openAuth("register", "buyer")}>
-                  Create buyer account
-                </Button>
-              ) : (
-                <Button asChild size="lg" variant="ghost">
-                  <Link to="/buyer-network">Join buyer network</Link>
-                </Button>
-              )}
+              <Button asChild size="lg" variant="outline">
+                <a href={mail}>Email {BRAND.paymentEmail}</a>
+              </Button>
             </div>
           </div>
         </Reveal>
       </Section>
 
-      <Section className="py-10">
-        <SectionHeader
-          align="left"
-          eyebrow="Buyer flow"
-          title="From search to offer"
-        />
-        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {stages.map((s, i) => (
-            <Reveal key={s.title} delay={i * 50}>
-              <div className="h-full rounded-2xl border border-border/70 bg-card/30 p-6">
-                <s.icon className="size-5 text-primary" />
-                <p className="mt-5 text-[11px] tracking-[0.16em] text-primary uppercase">0{i + 1}</p>
-                <h3 className="mt-1 text-base font-semibold">{s.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{s.copy}</p>
-              </div>
-            </Reveal>
+      <Section className="py-8">
+        <div className="grid gap-6 md:grid-cols-3">
+          {steps.map((s) => (
+            <div key={s.n} className="rounded-2xl border border-border/70 p-6">
+              <p className="text-sm font-medium text-primary">{s.n}</p>
+              <h2 className="mt-2 text-base font-semibold">{s.t}</h2>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{s.c}</p>
+            </div>
           ))}
         </div>
-      </Section>
-
-      <Section className="pt-4">
-        <h2 className="mb-6 text-2xl font-semibold tracking-tight">Buyer workspace</h2>
-        {isBuyer ? (
-          <BuyerWorkspace />
-        ) : (
-          <div className="rounded-2xl border border-dashed border-border px-6 py-12 text-center">
-            <p className="text-sm font-medium">Sign in as a buyer to use this workspace</p>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Saved SaaS, requests, offers, and conversations live here.
-            </p>
-            <Button className="mt-5" variant="premium" onClick={() => openAuth(user ? "register" : "login", "buyer")}>
-              {user ? "Need a buyer account" : "Sign in"}
-            </Button>
-          </div>
-        )}
+        <p className="mt-10 max-w-xl text-sm text-muted-foreground">
+          Deposit payments are arranged by email to {BRAND.paymentEmail}. A dedicated payment
+          inbox can replace this later.
+        </p>
       </Section>
     </>
   );

@@ -7,9 +7,11 @@ import { logoutUser, openAuth, useMarketplace } from "@/lib/marketplace";
 import { cn } from "@/lib/utils";
 
 const links = [
-  { to: "/businesses", label: "Browse" },
+  { to: "/", label: "Home" },
+  { to: "/businesses", label: "SaaS for sale" },
   { to: "/sell", label: "Sell" },
   { to: "/buy", label: "Buy" },
+  { to: "/contact", label: "Contact" },
 ] as const;
 
 export function Navbar() {
@@ -31,30 +33,31 @@ export function Navbar() {
         scrolled ? "border-b border-border/60 bg-background/90 backdrop-blur-xl" : "border-b border-transparent",
       )}
     >
-      <nav className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-5">
+      <nav className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-5">
         <Link to="/" onClick={() => setOpen(false)}>
           <Logo />
         </Link>
 
-        <div className="hidden items-center gap-1 sm:flex">
+        <div className="hidden items-center gap-0.5 md:flex">
           {links.map((l) => (
             <Link
               key={l.to}
               to={l.to}
-              className="rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors hover:text-foreground data-[status=active]:text-foreground"
+              activeOptions={{ exact: l.to === "/" }}
+              className="rounded-md px-3 py-2 text-[13px] font-medium text-muted-foreground transition-colors hover:text-foreground data-[status=active]:text-foreground"
             >
               {l.label}
             </Link>
           ))}
         </div>
 
-        <div className="hidden items-center gap-2 sm:flex">
+        <div className="hidden items-center gap-2 md:flex">
           {ready && user ? (
             <>
               <Button asChild size="sm" variant="ghost">
-                <Link to={user.type === "seller" ? "/sell" : "/buy"}>{user.name.split(" ")[0]}</Link>
+                <Link to={user.type === "seller" ? "/sell" : "/businesses"}>{user.name.split(" ")[0]}</Link>
               </Button>
-              <Button size="sm" variant="outline" onClick={() => logoutUser()}>
+              <Button size="sm" variant="outline" onClick={() => void logoutUser()}>
                 Sign out
               </Button>
             </>
@@ -63,8 +66,8 @@ export function Navbar() {
               <Button size="sm" variant="ghost" onClick={() => openAuth("login")}>
                 Sign in
               </Button>
-              <Button size="sm" variant="premium" onClick={() => openAuth("register")}>
-                Get started
+              <Button size="sm" variant="premium" onClick={() => openAuth("register", "visitor")}>
+                Join
               </Button>
             </>
           )}
@@ -73,14 +76,14 @@ export function Navbar() {
         <button
           aria-label="Toggle menu"
           onClick={() => setOpen((v) => !v)}
-          className="grid size-9 place-items-center rounded-md border border-border sm:hidden"
+          className="grid size-9 place-items-center rounded-md border border-border md:hidden"
         >
           {open ? <X className="size-4" /> : <Menu className="size-4" />}
         </button>
       </nav>
 
       {open ? (
-        <div className="border-t border-border bg-background px-5 py-4 sm:hidden">
+        <div className="border-t border-border bg-background px-5 py-4 md:hidden">
           {links.map((l) => (
             <Link
               key={l.to}
@@ -93,16 +96,37 @@ export function Navbar() {
           ))}
           <div className="mt-3 flex gap-2">
             {ready && user ? (
-              <Button variant="outline" className="flex-1" onClick={() => { logoutUser(); setOpen(false); }}>
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={() => {
+                  void logoutUser();
+                  setOpen(false);
+                }}
+              >
                 Sign out
               </Button>
             ) : (
               <>
-                <Button variant="ghost" className="flex-1" onClick={() => { setOpen(false); openAuth("login"); }}>
+                <Button
+                  variant="ghost"
+                  className="flex-1"
+                  onClick={() => {
+                    setOpen(false);
+                    openAuth("login");
+                  }}
+                >
                   Sign in
                 </Button>
-                <Button variant="premium" className="flex-1" onClick={() => { setOpen(false); openAuth("register"); }}>
-                  Get started
+                <Button
+                  variant="premium"
+                  className="flex-1"
+                  onClick={() => {
+                    setOpen(false);
+                    openAuth("register", "visitor");
+                  }}
+                >
+                  Join
                 </Button>
               </>
             )}

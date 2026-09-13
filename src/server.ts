@@ -3,9 +3,13 @@ import "./lib/error-capture";
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
 
+import { PlatformDO } from "./lib/platform-store.server";
+
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
 };
+
+const runtime = globalThis as typeof globalThis & { __fepEnv?: unknown };
 
 let serverEntryPromise: Promise<ServerEntry> | undefined;
 
@@ -44,8 +48,11 @@ function isH3SwallowedErrorBody(body: string): boolean {
   }
 }
 
+export { PlatformDO };
+
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
+    runtime.__fepEnv = env;
     try {
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);

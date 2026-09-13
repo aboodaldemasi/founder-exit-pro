@@ -15,11 +15,12 @@ export const Route = createFileRoute("/terms")({
 });
 
 const sections: { h: string; p: string }[] = [
-  { h: "Scope of services", p: "Founder Exit is a marketplace that connects SaaS founders with buyers. Nothing on this site constitutes an offer to sell or a solicitation to buy any security or business." },
-  { h: "No investment advice", p: "Information published about listed businesses is provided for evaluation purposes. It is not financial, legal or tax advice, and prospective buyers must complete their own due diligence." },
-  { h: "Listing information", p: "Metrics shown for listed businesses are provided by sellers and reviewed by Founder Exit. While reviewed in good faith, they are not warranted, and full verification occurs during diligence." },
-  { h: "Confidentiality and NDAs", p: "Access to complete financial and operational information is conditional on a signed non-disclosure agreement. Breach of an NDA may result in removal from the buyer network and legal action." },
-  { h: "Fees", p: "Seller representation is engaged on a success-fee basis unless otherwise agreed in a written mandate letter. Buyer network membership is free of charge." },
+  { h: "Scope of services", p: "Founder Exit is an intermediary for SaaS sales only. We do not own listed companies, we do not buy them, and nothing on this site is an offer by Founder Exit to sell a business or a security." },
+  { h: "The parties", p: "The seller owns the SaaS. Visitors browse anonymous listings. Anyone who wants to buy contacts Founder Exit and arranges a deposit with the operator. A sale agreement is between the parties we introduce — not a purchase from this website." },
+  { h: "No investment advice", p: "Listing metrics are provided by sellers for screening. It is not financial, legal or tax advice. Buyers must complete their own due diligence through Founder Exit." },
+  { h: "Listing information", p: "Public pages hide the product name. Metrics are supplied by the seller and checked before they go live, but they are not warranted." },
+  { h: "Confidentiality", p: "Brand, customers, and stack stay private on the public site. Founder Exit uses the real name only to verify the seller and to broker a serious enquiry." },
+  { h: "Fees", p: "Browsing and applying to sell do not create a purchase. A deposit to show buying intent is arranged with the operator by email until a payment inbox or gateway is added. Any success fee is agreed in writing." },
   { h: "Governing terms", p: "These terms may be updated from time to time. Continued use of the site constitutes acceptance of the current version." },
 ];
 
@@ -31,7 +32,7 @@ function Page() {
         <h1 className="text-gradient mt-6 text-4xl font-semibold tracking-tight md:text-5xl">
           Terms of Use
         </h1>
-        <p className="mt-4 text-sm text-muted-foreground">Last updated 5 August 2026</p>
+        <p className="mt-4 text-sm text-muted-foreground">Last updated 31 August 2026</p>
       </Reveal>
       <div className="mt-14 max-w-3xl space-y-10">
         {sections.map((s, i) => (
